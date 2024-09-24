@@ -577,3 +577,218 @@ class EBook extends Book {
   }
 }
 ```
+
+## Day 4: Advanced Types & Type Manipulation
+
+### 1. Type Aliases and Interfaces
+
+**Type Aliases**:
+
+- A Type Alias defines a type with a custom name.
+- It is useful for complex type definitions or for reusing types.
+
+```typescript
+type ID = string | number;
+
+type User = {
+  name: string;
+  age: number;
+};
+```
+
+**Interfaces**:
+
+- Interfaces are mainly used for object types. They define the shape of an object.
+- You can extend interfaces but not type aliases.
+
+```typescript
+interface Person {
+  name: string;
+  age: number;
+}
+
+// Extending an interface
+interface Employee extends Person {
+  position: string;
+}
+```
+
+**When to Use Each**:
+
+- **Use interfaces** when you are defining object shapes and prefer extending them in a more object-oriented way.
+- **Use type aliases** for defining unions, intersections, and complex types that aren't just objects.
+
+### 2. Intersection Types
+
+- Intersection types allow you to combine multiple types into one.
+
+```typescript
+type Admin = {
+  adminPrivileges: string[];
+};
+
+type Employee = {
+  name: string;
+  age: number;
+};
+
+type AdminEmployee = Admin & Employee;
+
+let adminEmployee: AdminEmployee = {
+  name: "Alice",
+  age: 30,
+  adminPrivileges: ["manage-system", "delete-records"],
+};
+```
+
+### 3. Mapped Types
+
+- Mapped types allow you to create new types by transforming existing types.
+- `Partial<T>`: Makes all properties of `T` optional.
+
+  ```typescript
+  interface Product {
+    id: number;
+    name: string;
+    price: number;
+  }
+
+  type PartialProduct = Partial<Product>; // All fields optional
+  ```
+
+- `Readonly<T>`: Makes all properties of `T` read-only.
+
+  ```typescript
+  type ReadonlyProduct = Readonly<Product>; // All fields are readonly
+  ```
+
+### 4. Utility Types
+
+- `Pick<T, K>`: Selects a subset of properties from type `T`.
+
+  ```typescript
+  type ProductNameAndPrice = Pick<Product, "name" | "price">;
+  ```
+
+- `Omit<T, K>`: Omits a subset of properties from type `T`.
+
+  ```typescript
+  type ProductWithoutID = Omit<Product, "id">;
+  ```
+
+- `Record<K, T>`: Creates an object type with keys `K` and values `T`.
+  ```typescript
+  type UserRoles = "admin" | "user";
+  type UserPermissions = Record<UserRoles, string[]>; // Record<"admin" | "user", string[]>
+  ```
+
+### 5. Conditional Types
+
+Conditional types allow you to choose a type based on a condition.
+
+```typescript
+type IsString<T> = T extends string ? "Yes" : "No";
+
+type Test1 = IsString<string>; // "Yes"
+type Test2 = IsString<number>; // "No"
+```
+
+### 6. Type Narrowing
+
+- Type narrowing is when TypeScript automatically narrows down the type based on conditions (type guards).
+
+```typescript
+function printValue(val: string | number) {
+  if (typeof val === "string") {
+    console.log(`String: ${val}`);
+  } else {
+    console.log(`Number: ${val}`);
+  }
+}
+```
+
+- **Type Guards**: Use `typeof`, `instanceof`, or custom type predicates to refine the type within a block of code.
+
+## Test Sheet - Day 4
+
+### Multiple Choice
+
+1. Which of the following is a utility type that makes all properties of an object type optional?
+
+   - Readonly
+   - **Partial**
+   - Omit
+
+2. What is an intersection type in TypeScript?
+
+   - A type that includes only common properties of two types
+   - **A type that combines multiple types into one**
+   - A type that makes all properties readonly
+
+### Short Answer
+
+1. What is the difference between a type alias and an interface? Provide examples for both.
+```typescript
+// Type alias - it is a type definition for a complex type created using multiple types. For ex -
+type StringOrBoolean = string | boolean;
+let isPublic: StringOrBoolean = 'true';
+
+// Interface - It is also a type definition used for objects. An interface can be extended. For ex -
+interface Employee {
+  id: number;
+  name: string;
+  salary: number;
+}
+
+interface Admin extends Employee {
+  adminPrivalges: string[];
+}
+```
+
+2. What is type narrowing? Write an example function that narrows down a union type (number | string) based on a condition.
+
+```typescript
+// Type narrowing is cutting down the types from a list of types based on conditional checks placed or type guards like typeof, instanceof. For ex -
+function narrowType(salary: number | string) {
+  if(typeof salary === 'number') {
+    console.log(`Number - ${salary}`)
+  } else if (typeof salary === 'string') {
+    console.log(`String - ${salary}`)
+  }
+}
+```
+
+### Coding Challenge
+
+Create a TypeScript type alias Person with properties name and age, and a second type alias Employee that includes Person and an additional property position. Then create an object of type Employee.
+Write a function getUserInfo that takes a parameter of type Person | Employee and prints different messages depending on whether the person is an employee or not. Use type narrowing to check if the parameter is an employee.
+
+```typescript
+// solution
+type Person = {
+  name: string;
+  age: number;
+};
+
+type Employee = Person & {
+  position: string;
+};
+
+let employee: Employee = {
+  name: "John",
+  age: 30,
+  position: "Manager",
+};
+
+function getUserInfo(user: Person | Employee) {
+  if ("position" in user) {
+    console.log(`${user.name} is an Employee with position ${user.position}.`);
+  } else {
+    console.log(`${user.name} is not an Employee.`);
+  }
+}
+
+getUserInfo(employee);  
+// Output: "John is an Employee with position Manager."
+
+```
