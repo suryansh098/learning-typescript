@@ -728,35 +728,36 @@ function printValue(val: string | number) {
 ### Short Answer
 
 1. What is the difference between a type alias and an interface? Provide examples for both.
-```typescript
-// Type alias - it is a type definition for a complex type created using multiple types. For ex -
-type StringOrBoolean = string | boolean;
-let isPublic: StringOrBoolean = 'true';
 
-// Interface - It is also a type definition used for objects. An interface can be extended. For ex -
-interface Employee {
-  id: number;
-  name: string;
-  salary: number;
-}
+    ```typescript
+    // Type alias - it is a type definition for a complex type created using multiple types. For ex -
+    type StringOrBoolean = string | boolean;
+    let isPublic: StringOrBoolean = 'true';
 
-interface Admin extends Employee {
-  adminPrivalges: string[];
-}
-```
+    // Interface - It is also a type definition used for objects. An interface can be extended. For ex -
+    interface Employee {
+      id: number;
+      name: string;
+      salary: number;
+    }
+
+    interface Admin extends Employee {
+      adminPrivalges: string[];
+    }
+    ```
 
 2. What is type narrowing? Write an example function that narrows down a union type (number | string) based on a condition.
 
-```typescript
-// Type narrowing is cutting down the types from a list of types based on conditional checks placed or type guards like typeof, instanceof. For ex -
-function narrowType(salary: number | string) {
-  if(typeof salary === 'number') {
-    console.log(`Number - ${salary}`)
-  } else if (typeof salary === 'string') {
-    console.log(`String - ${salary}`)
-  }
-}
-```
+    ```typescript
+    // Type narrowing is cutting down the types from a list of types based on conditional checks placed or type guards like typeof, instanceof. For ex -
+    function narrowType(salary: number | string) {
+      if(typeof salary === 'number') {
+        console.log(`Number - ${salary}`)
+      } else if (typeof salary === 'string') {
+        console.log(`String - ${salary}`)
+      }
+    }
+    ```
 
 ### Coding Challenge
 
