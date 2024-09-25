@@ -729,35 +729,35 @@ function printValue(val: string | number) {
 
 1. What is the difference between a type alias and an interface? Provide examples for both.
 
-    ```typescript
-    // Type alias - it is a type definition for a complex type created using multiple types. For ex -
-    type StringOrBoolean = string | boolean;
-    let isPublic: StringOrBoolean = 'true';
+   ```typescript
+   // Type alias - it is a type definition for a complex type created using multiple types. For ex -
+   type StringOrBoolean = string | boolean;
+   let isPublic: StringOrBoolean = "true";
 
-    // Interface - It is also a type definition used for objects. An interface can be extended. For ex -
-    interface Employee {
-      id: number;
-      name: string;
-      salary: number;
-    }
+   // Interface - It is also a type definition used for objects. An interface can be extended. For ex -
+   interface Employee {
+     id: number;
+     name: string;
+     salary: number;
+   }
 
-    interface Admin extends Employee {
-      adminPrivalges: string[];
-    }
-    ```
+   interface Admin extends Employee {
+     adminPrivalges: string[];
+   }
+   ```
 
 2. What is type narrowing? Write an example function that narrows down a union type (number | string) based on a condition.
 
-    ```typescript
-    // Type narrowing is cutting down the types from a list of types based on conditional checks placed or type guards like typeof, instanceof. For ex -
-    function narrowType(salary: number | string) {
-      if(typeof salary === 'number') {
-        console.log(`Number - ${salary}`)
-      } else if (typeof salary === 'string') {
-        console.log(`String - ${salary}`)
-      }
-    }
-    ```
+   ```typescript
+   // Type narrowing is cutting down the types from a list of types based on conditional checks placed or type guards like typeof, instanceof. For ex -
+   function narrowType(salary: number | string) {
+     if (typeof salary === "number") {
+       console.log(`Number - ${salary}`);
+     } else if (typeof salary === "string") {
+       console.log(`String - ${salary}`);
+     }
+   }
+   ```
 
 ### Coding Challenge
 
@@ -789,7 +789,525 @@ function getUserInfo(user: Person | Employee) {
   }
 }
 
-getUserInfo(employee);  
+getUserInfo(employee);
 // Output: "John is an Employee with position Manager."
+```
 
+## Day 5: Advanced Functions, Generic Types, and Utility Types
+
+### 1. Generic Functions and Constraints Recap
+
+Generics allow you to create flexible, reusable functions and classes that work with multiple types, while maintaining type safety. You can also add constraints to ensure the generic type meets specific conditions.
+
+**Why Use Generics?**
+
+Without generics, you’d need to define a separate version of a function for every type you want it to work with, or you’d have to use the any type, which would remove type safety.
+
+For example, without generics:
+
+```typescript
+function identity(arg: any): any {
+  return arg;
+}
+```
+
+Using any doesn’t preserve the type information. If you pass a string, the return type is any, not specifically a string, which can lead to bugs and less readability.
+
+**Generic Syntax**
+
+Generics are introduced using angle brackets (<>) and allow the type to be a parameter.
+
+```typescript
+function identity<T>(arg: T): T {
+  return arg;
+}
+```
+
+In this function:
+
+- `T` is a generic type parameter.
+- The parameter `arg` has the type `T`, and the function returns a value of type `T`.
+
+This ensures that if you call the function with a string, the return type will be a string. If you call it with a number, the return type will be a number.
+
+**Example of Using Generics**
+
+```typescript
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+let result1 = identity<string>("Hello World"); // T is string, return type is string
+let result2 = identity<number>(100); // T is number, return type is number
+```
+
+Here, TypeScript infers the type you provide. The identity function adapts to the type T based on the type you pass as an argument.
+
+**Type Inference with Generics**
+
+Often, TypeScript can infer the type without explicitly specifying it:
+
+```typescript
+let result = identity("Hello!"); // T is inferred as string
+```
+
+TypeScript infers `T` from the argument `"Hello!"`, so you don’t need to specify the type manually.
+
+**Generic Constraints**
+
+You can restrict the type parameter to specific types or interfaces using constraints. For example, if you want to ensure that a type has certain properties, you can use the `extends` keyword:
+
+```typescript
+function loggingLength<T extends { length: number }>(arg: T): number {
+  return arg.length;
+}
+```
+
+Here, `T` is constrained to types that have a `length` property (like arrays, strings, etc.).
+
+Examples:
+
+```typescript
+loggingLength("Hello World"); // Works, because string has a length
+loggingLength([1, 2, 3, 4]); // Works, because array has a length
+loggingLength(10); // Error, because number doesn't have a length
+```
+
+**Working with Multiple Type Parameters**
+
+You can define functions with multiple generic type parameters:
+
+```typescript
+Copy code
+function merge<T, U>(obj1: T, obj2: U): T & U {
+return { ...obj1, ...obj2 };
+}
+
+const person = merge({ name: "Suryansh" }, { age: 25 });
+console.log(person); // Output: { name: 'Suryansh', age: 25 }
+```
+
+Here, `merge` combines two objects into one. The types `T` and `U` represent the types of the two objects being merged, and the return type is the intersection of both types (`T & U`).
+
+**Generic Interfaces**
+
+Interfaces can also be generic:
+
+```typescript
+interface Box<T> {
+  contents: T;
+}
+
+let box: Box<string> = { contents: "A gift" };
+console.log(box.contents); // Output: "A gift"
+```
+
+Here, the `Box` interface has a generic type `T`, and when we use the interface, we specify that `T` should be a `string`. This makes the `contents` property a `string`.
+
+**Generic Classes**
+
+Classes can also be generic in TypeScript. Here’s an example of a generic class:
+
+```typescript
+class Box<T> {
+  contents: T;
+
+  constructor(value: T) {
+    this.contents = value;
+  }
+
+  getContents(): T {
+    return this.contents;
+  }
+}
+
+let stringBox = new Box<string>("Generics are fun!");
+let numberBox = new Box<number>(100);
+
+console.log(stringBox.getContents()); // Output: "Generics are fun!"
+console.log(numberBox.getContents()); // Output: 100
+```
+
+**Bounded Generics with Interfaces**
+
+If you want to limit the types that can be passed to a generic function, you can use interfaces:
+
+```typescript
+interface HasName {
+  name: string;
+}
+
+function greet<T extends HasName>(obj: T): void {
+  console.log("Hello, " + obj.name);
+}
+
+greet({ name: "Suryansh", age: 25 }); // Valid, as the object has a name property
+greet({ age: 25 }); // Error, as the object does not have a name property
+```
+
+In this case, we’ve constrained `T` to types that have a `name` property. This allows the `greet` function to be type-safe when working with objects that meet this interface.
+
+**Conclusion**
+
+Generics provide a powerful way to create flexible and reusable code while maintaining type safety in TypeScript. They enable you to write functions, classes, or interfaces that can handle various types without compromising type information or safety.
+
+**Key Benefits of Generics**
+
+- Reusability: You write the logic once but can use it for many types.
+- Type Safety: Unlike any, generics maintain type information.
+- Flexibility: Generics work with multiple types, allowing flexibility without losing the structure of your code.-
+
+## 2. Utility Types: Advanced
+
+Beyond `Partial`, `Pick`, and `Omit`, TypeScript provides several other useful utility types. Let’s cover some important ones:
+
+1. `Exclude<Type, ExcludedUnion>`
+
+   Constructs a type by excluding certain types from a union.
+
+   ```typescript
+   type Primitive = string | number | boolean;
+   type NonBoolean = Exclude<Primitive, boolean>; // string | number
+   ```
+
+2. `Extract<Type, Union>`
+
+   Extracts types that are assignable to a union.
+
+   ```typescript
+   type Primitive = string | number | boolean;
+   type OnlyString = Extract<Primitive, string>; // string
+   ```
+
+3. `NonNullable<Type>`
+
+   Removes null and undefined from a type.
+
+   ```typescript
+   type MaybeNumber = number | null | undefined;
+   type DefiniteNumber = NonNullable<MaybeNumber>; // number
+   ```
+
+4. `ReturnType<Type>`
+
+   Infers the return type of a function.
+
+   ```typescript
+   function getUserAge(): number {
+     return 25;
+   }
+
+   type AgeType = ReturnType<typeof getUserAge>; // number
+   ```
+
+5. `InstanceType<Type>`
+
+   Constructs a type representing the instance type of a constructor function or class.
+
+   ```typescript
+   class User {
+     constructor(public name: string, public age: number) {}
+   }
+
+   type UserInstance = InstanceType<typeof User>; // User
+   ```
+
+6. `ThisType<Type>`
+
+   Used for "this"-related typing, especially useful in object-oriented patterns.
+
+   ```typescript
+   interface Obj {
+     name: string;
+     greet(): void;
+   }
+
+   const myObj: ThisType<Obj> = {
+     name: "Suryansh",
+     greet() {
+       console.log(`Hello, ${this.name}!`);
+     },
+   };
+
+   myObj.greet(); // "Hello, Suryansh!"
+   ```
+
+### 3. Conditional Types Recap
+
+Conditional types in TypeScript provide a way to define types that depend on a condition, making your types more dynamic and flexible. They allow you to create types that change based on whether a certain condition is met or not, similar to how conditional logic works in functions.
+
+The syntax for conditional types looks like this:
+
+```typescript
+T extends U ? X : Y
+```
+
+- If T extends U, the type resolves to X.
+- Otherwise, the type resolves to Y.
+
+This means that you can apply a condition to types and decide which type should be assigned based on whether the condition is true or false.
+
+**Basic Example of Conditional Types**
+Here’s a simple example of how conditional types work:
+
+```typescript
+type IsString<T> = T extends string
+  ? "Yes, it's a string"
+  : "No, it's not a string";
+
+type A = IsString<string>; // A is "Yes, it's a string"
+type B = IsString<number>; // B is "No, it's not a string"
+```
+
+In this example:
+
+- `IsString<T>` checks if `T` extends the type `string`.
+- If `T` is a `string`, it resolves to `"Yes, it's a string"`.
+- If `T` is not a `string`, it resolves to `"No, it's not a string"`.
+
+**How Conditional Types Work**
+
+The `extends` keyword is used to check whether a type satisfies a condition. This is similar to how you would check if a class extends another class or if an interface extends another interface. With conditional types, you're checking if a type satisfies certain constraints.
+
+**Real-world Use Cases of Conditional Types**
+
+1. **Extracting Types Based on Conditions**
+
+   You can use conditional types to extract certain types based on conditions. For example, you might want to extract the return type of a function or ensure a function always returns a certain type.
+
+   ```typescript
+   type GetReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
+
+   function add(a: number, b: number): number {
+     return a + b;
+   }
+
+   type ReturnTypeOfAdd = GetReturnType<typeof add>; // ReturnTypeOfAdd is number
+   ```
+
+   In this example:
+
+   - `T` extends `(...args: any[]) => infer R` checks if `T` is a function.
+   - If it is, it uses the `infer` keyword to extract the return type `R` of the function.
+   - Otherwise, it resolves to `never`.
+
+2. **Filtering Types**
+
+   Conditional types are useful when you want to filter out certain types from a union type:
+
+   ```typescript
+   type ExcludeString<T> = T extends string ? never : T;
+
+   type Result = ExcludeString<string | number | boolean>; // Result is number | boolean
+   ```
+
+In this example:
+
+- `ExcludeString<T>` checks if `T` is `string`.
+- If `T` is `string`, it resolves to `never` (which effectively removes it from the union).
+- Otherwise, it keeps the type.
+
+3. Mapping Over Unions
+
+   Conditional types can also iterate over union types and apply transformations:
+
+```typescript
+type WrappedInArray<T> = T extends any ? T[] : never;
+
+type Result = WrappedInArray<string | number>; // Result is string[] | number[]
+```
+
+In this example:
+
+- `WrappedInArray<T>` checks if `T` is part of a union and wraps each type in an array.
+- The result is `string[] | number[]` because `string` and `number` are the two types in the union, and each is wrapped in an array.
+
+**Advanced Concepts: Infer Keyword**
+
+One of the most powerful features of conditional types is the `infer` keyword, which allows you to infer or "capture" a type from some part of the condition.
+
+For example, you can use `infer` to extract return types from function signatures:
+
+```typescript
+type GetReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
+
+function greet(): string {
+  return "Hello, world!";
+}
+
+type GreetReturnType = GetReturnType<typeof greet>; // GreetReturnType is string
+```
+
+Here, the `infer` keyword captures the return type of the function and assigns it to `R`, which you can then use in the conditional type.
+
+**Practical Use Cases of Conditional Types**
+
+1. **Creating Utility Types**
+
+Many of TypeScript's built-in utility types (like `ReturnType`, `Exclude`, `Extract`, etc.) are based on conditional types.
+
+- `ReturnType` extracts the return type of a function.
+- `Exclude` removes certain types from a union.
+- `Extract` keeps only certain types from a union.
+
+**Example of `ReturnType`**:
+
+```typescript
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
+
+function multiply(a: number, b: number): number {
+  return a \* b;
+}
+
+type MultiplyReturnType = ReturnType<typeof multiply>; // number
+```
+
+2. **Building Custom Utility Types**
+
+You can create your own utility types using conditional types. For instance, a utility type to check if a type is an array:
+
+```typescript
+type IsArray<T> = T extends any[] ? true : false;
+
+type A = IsArray<number[]>; // true
+type B = IsArray<string>; // false
+```
+
+**Distributive Conditional Types**
+
+Conditional types can distribute over union types automatically. This is known as a distributive conditional type. It means the conditional type is applied individually to each member of the union.
+
+```typescript
+type Distribute<T> = T extends any ? T[] : never;
+
+type DistributedUnion = Distribute<number | string>; // number[] | string[]
+```
+
+Here, `number | string` is a union type, and the conditional type applies to both `number` and `string` separately. The result is `number[] | string[]`.
+
+**Combining Conditional Types with Utility Types**
+
+You can combine conditional types with TypeScript’s utility types to create powerful abstractions. Here’s an example that removes all `readonly` modifiers from an object type:
+
+```typescript
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
+interface User {
+  readonly id: number;
+  readonly name: string;
+}
+
+type MutableUser = Mutable<User>; // { id: number; name: string }
+```
+
+**Example: Recursive Conditional Types**
+
+Conditional types can even be recursive. For instance, if you want to flatten a nested array type:
+
+```typescript
+type Flatten<T> = T extends any[] ? Flatten<T[number]> : T;
+
+type A = Flatten<number[][][]>; // number
+```
+
+Here, `Flatten<T>` checks if `T` is an array (`T extends any[]`), and if so, it recursively flattens it by accessing `T[number]`, which gives the type of the elements of the array. This process continues until the type is no longer an array, resulting in a flattened type.
+
+**Summary of Conditional Types**
+
+- **Type Resolution**: Conditional types resolve to different types based on a condition.
+- **Syntax**: `T extends U ? X : Y` – If `T` extends `U`, the type resolves to `X`, otherwise to `Y`.
+- **Type Inference**: You can infer types dynamically using the `infer` keyword.
+- **Distributive**: Conditional types distribute over union types automatically.
+- **Utility Types**: Many TypeScript utility types like `ReturnType`, `Exclude`, and `Extract` are built using conditional types.
+
+Conditional types allow you to create flexible, reusable types that adapt based on the input, helping you enforce type safety while still accommodating various use cases in complex type systems.
+
+### 4. Function Overloads
+
+You can define multiple function signatures to handle different input types and behaviors.
+
+```typescript
+function combine(a: number, b: number): number;
+function combine(a: string, b: string): string;
+function combine(a: any, b: any): any {
+  return a + b;
+}
+
+combine(1, 2); // 3
+combine("a", "b"); // "ab"
+```
+
+## Test Sheet - Day 5
+
+### Multiple Choice
+
+1. What does the Extract utility type do?
+
+   - **Extracts types assignable to a union**
+   - Excludes certain types from a union
+   - Removes null and undefined from a type
+
+2. How can you infer the return type of a function in TypeScript?
+
+   - **Using the ReturnType utility type**
+   - Using the InstanceType utility type
+   - Using the Exclude utility type
+
+### Short Answer
+
+1. What does the NonNullable utility type do? Write an example.
+
+   ```typescript
+   // NonNullable utility type removes null and undefined types from a union of types. For ex -
+   type MayBeString = string | null | undefined;
+   type NonNullString = NonNullable<MayBeString>; // string
+   ```
+
+2. Write a TypeScript function sumOrConcat that either adds two numbers or concatenates two strings, depending on the types of the inputs. Demonstrate function overloads.
+
+   ```typescript
+   function sumOrConcat(a: number, b: number): number;
+   function sumOrConcat(a: string, b: string): string;
+   function sumOrConcat(a: any, b: any): any {
+     return a + b;
+   }
+
+   console.log(sumOrConcat(3, 4)); // 7
+   console.log(sumOrConcat("Hello ", "Suryansh!")); // "Hello Suryansh!"
+   ```
+
+### Coding Challenge
+
+Create a TypeScript class Queue that uses generics. It should have methods for enqueue (adding an item), dequeue (removing an item), and peek (checking the first item in the queue). Use constraints to ensure that the queue only works with types that have a toString() method.
+
+```typescript
+// solution
+class Queue<T> {
+  private data: T[];
+
+  constructor<T>() {
+    this.data: T[] = [];
+  }
+
+  function enqueue(element: T) {
+    this.data.push(element);
+  }
+
+  function dequeue(): T | undefined {
+    return this.data.shift();
+  }
+
+  function peek(): T | undefined {
+    return data[0];
+  }
+}
+
+let stringQueue = new Queue<string>();
+stringQueue.enqueue("first");
+stringQueue.enqueue("second");
+console.log(stringQueue.peek()); // "first"
+stringQueue.dequeue();
+console.log(stringQueue.peek()); // "second"
 ```
