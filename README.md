@@ -1032,7 +1032,7 @@ Beyond `Partial`, `Pick`, and `Omit`, TypeScript provides several other useful u
    myObj.greet(); // "Hello, Suryansh!"
    ```
 
-### 3. Conditional Types Recap
+### 3. Conditional Types
 
 Conditional types in TypeScript provide a way to define types that depend on a condition, making your types more dynamic and flexible. They allow you to create types that change based on whether a certain condition is met or not, similar to how conditional logic works in functions.
 
@@ -1239,7 +1239,7 @@ combine(1, 2); // 3
 combine("a", "b"); // "ab"
 ```
 
-## Test Sheet - Day 5
+## Test Sheet 1 - Day 5
 
 ### Multiple Choice
 
@@ -1285,21 +1285,17 @@ Create a TypeScript class Queue that uses generics. It should have methods for e
 ```typescript
 // solution
 class Queue<T> {
-  private data: T[];
+  private data: T[] = [];
 
-  constructor<T>() {
-    this.data: T[] = [];
-  }
-
-  function enqueue(element: T) {
+  enqueue(element: T) {
     this.data.push(element);
   }
 
-  function dequeue(): T | undefined {
+  dequeue(): T | undefined {
     return this.data.shift();
   }
 
-  function peek(): T | undefined {
+  peek(): T | undefined {
     return data[0];
   }
 }
@@ -1310,4 +1306,97 @@ stringQueue.enqueue("second");
 console.log(stringQueue.peek()); // "first"
 stringQueue.dequeue();
 console.log(stringQueue.peek()); // "second"
+```
+
+## Test Sheet 2 - Day 5
+
+### Multiple Choice
+
+1. Which utility type is used to combine two types into one that contains only the properties common to both?
+
+   - Union
+   - **Intersection**
+   - Exclude
+
+2. What does the `ReturnType<T>` utility type do?
+
+   - Converts the type `T` into a string
+   - **Extracts the return type of a function type `T`**
+   - Extracts the instance type of a class
+
+### Short Answer
+
+1. What is the `Exclude<T, U>` utility type used for? Write an example of using `Exclude` to remove certain types from a union.
+
+   ```typescript
+   // Exclude<T, U> - It is used to exclude type T from union U
+
+   type Primitive = string | number | boolean;
+   type NonBooleanPrimitive = Exclude<Primitive, boolean>; // string | number
+   ```
+
+2. Write a TypeScript function `addOrMerge` that can either add two numbers or merge two arrays. Demonstrate function overloads.
+
+   ```typescript
+   function addOrMerge(a: number, b: number): number;
+   function addOrMerge<T>(a: T[], b: T[]): T[];
+   function addOrMerge<T>(a: T, b: T): T {
+     if (Array.isArray(a) && Array.isArray(b)) {
+       return a.concat(b);
+     }
+     return a + b;
+   }
+
+   console.log(addOrMerge(3, 4)); // 7
+   console.log(addOrMerge([3], [4])); // [3, 4]
+   ```
+
+### Coding Challenge
+
+Create a generic class called Stack that implements the following methods:
+
+- **push(item: T)** - Adds an item to the stack.
+- **pop()** - Removes and returns the last item.
+- **peek()** - Returns the last item without removing it.
+
+Ensure that the `Stack` class only works with types that have a `toString()` method.
+
+```typescript
+// solution
+interface HasToString {
+  toString: () => string;
+}
+
+class Stack<T extends HasToString> {
+  private data: T[] = [];
+
+  push(item: T): void {
+    this.data.push(item);
+  }
+
+  pop(): T | undefined {
+    return this.data.pop();
+  }
+
+  peek(): T | undefined {
+    const length = this.data.length;
+    if (length === 0) return undefined;
+    return this.data[length - 1];
+  }
+}
+
+class Person implements HasToString {
+  constructor(private name: string) {}
+
+  toString(): string {
+    return this.name;
+  }
+}
+
+let personStack = new Stack<Person>();
+personStack.push(new Person("Alice"));
+personStack.push(new Person("Bob"));
+console.log(personStack.peek()?.toString()); // Bob
+personStack.pop();
+console.log(personStack.peek()?.toString()); // Alice
 ```
